@@ -1,4 +1,4 @@
-#!/work1/cuigx2_work/whn/anaconda_install/anaconda2/bin/python
+#!/work1/cuigx2_work/whn/anaconda_install/anaconda3/bin/python
 from plot_lib import *
 
 

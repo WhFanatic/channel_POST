@@ -1,9 +1,28 @@
-#!/work1/cuigx2_work/whn/anaconda_install/anaconda2/bin/python
+#!/work1/cuigx2_work/whn/anaconda_install/anaconda3/bin/python
 import numpy as np
 from numpy.fft import ifft as fft # in fortran program, ifft and fft are inversed
 from numpy.fft import fft as ifft # in fortran program, ifft and fft are inversed
 from numpy.polynomial.chebyshev import chebfit, chebder, chebval
 from struct import pack,unpack
+
+
+# class Data:
+# 	def __init__(self, workpath="workpath.txt"):
+# 		with open(workpath) as fp:
+# 			for line in fp.readlines():
+# 				line = line.strip()
+# 				if "SOURCE_PATH" == line[:11]: self.data_path = line.split()[-1].strip()
+# 				if "TARGET_PATH" == line[:11]: self.postdata_path = line.split()[-1].strip()
+
+# 		self.getPara()
+
+# 	def getPara():
+# 		pass
+
+
+# a = Data()
+
+# exit()
 
 
 ## user input

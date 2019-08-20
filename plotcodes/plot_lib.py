@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 class Tecplot:
 
-	def __parse_head(self, fpn):
+	def parse_head(self, fpn):
 		with open(fpn) as fp:
 			line = fp.readline()
 
@@ -40,26 +40,35 @@ class Tecplot:
 
 		return labels, coords
 
+	def write_head(self, fpn, title, labels, coords):
+		with open(fpn, 'w') as fp:
+			fp.write( 'Title = "%s"\n' %title )
+			fp.write( 'variables = "%s"\n' %( '", "'.join(labels) ) )
+			if len(coords) == 1: fp.write( 'zone i = %i\n' %tuple(coords) )
+			if len(coords) == 2: fp.write( 'zone i = %i, j = %i\n' %tuple(coords) )
+			if len(coords) == 3: fp.write( 'zone i = %i, j = %i, k = %i\n' %tuple(coords) )
+
+
 
 	def coord(self, fpn, n):
-		return self.__parse_head(fpn)[1][n]
+		return self.parse_head(fpn)[1][n]
 
 	def dim(self, fpn):
-		return len(self.__parse_head(fpn)[1])
+		return len(self.parse_head(fpn)[1])
 
 	def label(self, fpn, n):
-		labels, coords = self.__parse_head(fpn)
+		labels, coords = self.parse_head(fpn)
 		return labels[n-1+self.dim(fpn)]
 
 	def xlabel(self, fpn):
-		return self.__parse_head(fpn)[0][0]
+		return self.parse_head(fpn)[0][0]
 
 	def ylabel(self, fpn):
-		return self.__parse_head(fpn)[0][1]
+		return self.parse_head(fpn)[0][1]
 
 
 	def getData(self, fpn, n, rows=[]):
-		labels, coords = self.__parse_head(fpn)
+		labels, coords = self.parse_head(fpn)
 		ncol = len(labels)
 		nrow = np.prod(coords)
 		rowrange = range(nrow) if rows==[] else rows
@@ -132,7 +141,6 @@ class Case:
 
 		self.color = color
 		self.style = style
-		self.width = 2
 
 		self.plot = Tecplot()
 
@@ -155,7 +163,7 @@ class Case:
 		ka = {key:kwarg[key] for key in kwarg.keys()}
 		if "color" not in ka.keys(): ka["color"] = self.color
 		if "linestyle" not in ka.keys() and "ls" not in ka.keys(): ka["linestyle"] = self.style
-		if "linewidth" not in ka.keys() and "lw" not in ka.keys(): ka["linewidth"] = self.width
+		if "linewidth" not in ka.keys() and "lw" not in ka.keys(): ka["linewidth"] = 2
 
 		c = self.plot.curve(ax, self.path+filename, n, **ka)
 
@@ -163,7 +171,7 @@ class Case:
 		ka = {key:kwarg[key] for key in kwarg.keys()}
 		if "colors" not in ka.keys(): ka["colors"] = self.color
 		if "linestyles" not in ka.keys(): ka["linestyles"] = self.style
-		if "linewidths" not in ka.keys(): ka["linewidths"] = self.width
+		if "linewidths" not in ka.keys(): ka["linewidths"] = 1
 
 		c = self.plot.contour(ax, self.path+filename, n, filled, **ka)
 

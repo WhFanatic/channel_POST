@@ -225,16 +225,16 @@ try:
 		temp1, temp2, lamw_omega_c, lamw_B = get_ESTS_PARA(j_probes[j]) # [4], [4], [4,Nx], [4,Nx]
 		elip_U.append(temp1)
 		elip_V.append(temp2)
-		lamw_omega_c *= -t_nu
-		lamw_B_sqrt = lamw_B**0.5 * t_nu
+		lamw_omega_c *= -t_nu / (k_x_plus + 1e-20)
+		lamw_B_sqrt = lamw_B**0.5 * t_nu / (k_x_plus + 1e-20)
 
 		file_name = 'ESTS_moments_jprb%i.dat' %j
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "first and second order moments of time-space energy spectra at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"\n' %(
 				r"$k_x^+$",
-				r"$-\omega_{c,uu}^+$", r"$-\omega_{c,vv}^+$", r"$-\omega_{c,ww}^+$", r"$-\omega_{c,pp}^+$",
-				r"$\sqrt{B_{uu}^+}$", r"$\sqrt{B_{vv}^+}$", r"$\sqrt{B_{ww}^+}$", r"$\sqrt{B_{pp}^+}$"	) )
+				r"$\frac{-\omega_{c,uu}^+}{k_x^+}$", r"$\frac{-\omega_{c,vv}^+}{k_x^+}$", r"$\frac{-\omega_{c,ww}^+}{k_x^+}$", r"$\frac{-\omega_{c,pp}^+}{k_x^+}$",
+				r"$\frac{\sqrt{B_{uu}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{vv}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{ww}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{pp}^+}}{k_x^+}$"	) )
 			fp.write( 'zone i = %i\n' %len(plot_x) )
 			for i in plot_x:
 				for data in [ k_x_plus[i] ] + list( lamw_omega_c[:,i] ) + list( lamw_B_sqrt[:,i] ):
@@ -345,16 +345,16 @@ try:
 
 	# LAMW parameters reconstructed from space data
 	lamw_omega_c, lamw_B = get_LAMW() # [4, Ny+1, Nx], [4, Ny+1, Nx]
-	lamw_omega_c *= -t_nu
-	lamw_B_sqrt = lamw_B**0.5 * t_nu
+	lamw_omega_c *= -t_nu / (k_x_plus + 1e-20)
+	lamw_B_sqrt = lamw_B**0.5 * t_nu / (k_x_plus + 1e-20)
 	for j in range(len(j_probes)):
 		file_name = 'lamw_plot_jprb%i.dat' %j
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "LAMW parameters of time-space energy spectra at y_plus %.2f reconstructed from space data"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"\n' %(
 				r"$k_x^+$",
-				r"$-\omega_{c,uu}^+$", r"$-\omega_{c,vv}^+$", r"$-\omega_{c,ww}^+$", r"$-\omega_{c,pp}^+$",
-				r"$\sqrt{B_{uu}^+}$", r"$\sqrt{B_{vv}^+}$", r"$\sqrt{B_{ww}^+}$", r"$\sqrt{B_{pp}^+}$"	) )
+				r"$\frac{-\omega_{c,uu}^+}{k_x^+}$", r"$\frac{-\omega_{c,vv}^+}{k_x^+}$", r"$\frac{-\omega_{c,ww}^+}{k_x^+}$", r"$\frac{-\omega_{c,pp}^+}{k_x^+}$",
+				r"$\frac{\sqrt{B_{uu}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{vv}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{ww}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{pp}^+}}{k_x^+}$"	) )
 			fp.write( 'zone i = %i\n' %len(plot_x) )
 			for i in plot_x:
 				for data in [ k_x_plus[i] ] + list( lamw_omega_c[:,j_probes[j],i] ) + list( lamw_B_sqrt[:,j_probes[j],i] ):

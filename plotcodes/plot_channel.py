@@ -1,18 +1,21 @@
 #!/work1/cuigx2_work/whn/anaconda_install/anaconda3/bin/python
+
 from collections import Iterable
-from plot_lib import Case
+from plot_lib import *
 
 M1000 = Case("/back1/cuigx2_back1/whn/data/DNS1000M/postdata/figures/", name="M1000", color="red", style="-")
-M2000 = Case("/back1/cuigx2_back1/whn/data/DNS2000M/postdata/figures/", name="M2000", color="blue", style="--")
-M4000 = Case("/back1/cuigx2_back1/whn/data/DNS4000M/postdata/figures/", name="M4000", color="green", style="-.")
-F1000 = Case("/back1/cuigx2_back1/whn/data/DNS1000F/postdata/figures/", name="F1000", color="black", style=":")
+M2000 = Case("/back1/cuigx2_back1/whn/data/DNS2000M/postdata/figures/", name="M2000", color="blue", style="-.")
+M4000 = Case("/back1/cuigx2_back1/whn/data/DNS4000M/postdata/figures/", name="M4000", color="green", style=":")
+F1000 = Case("/back1/cuigx2_back1/whn/data/DNS1000F/postdata/figures/", name="F1000", color="black", style="--")
+
+figure_path = 'figures/'
 
 # figure parameters
-lambda_x_plus_lim = np.array([16, 3500])
-lambda_z_plus_lim = np.array([8, 350])
-k_x_plus_lim = np.array([-1, 1]) * max(2*np.pi / lambda_x_plus_lim)
-k_t_plus_lim = np.array([-1, 1]) * max(15 * k_x_plus_lim)
-y_plus_lim = [1, 150]
+lambda_x_plus_lim = [16, 3500]
+lambda_z_plus_lim = [8, 350]
+k_x_plus_lim = list( np.array([-1, 1]) * 2*np.pi / min(lambda_x_plus_lim) )
+k_t_plus_lim = list( np.array([-1, 1]) * 15 * max(k_x_plus_lim) )
+y_plus_lim = [1, 200]
 
 
 
@@ -24,9 +27,8 @@ def plot_MeanU(cases, figname='MeanU'):
 
 	ax.legend([case.name for case in cases], loc='upper left', fontsize=8, handlelength=5, frameon=False)
 	ax.set_xlim(y_plus_lim)
-	ax.set_ylim([0,25])
+	ax.set_ylim([0,20])
 
-	fig.align_labels()
 	fig.tight_layout()
 	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
@@ -35,20 +37,19 @@ def plot_FlucIntens(cases, figname='FlucIntens'):
 	ns = (1,2,3,5)
 	ylims = ([0,10], [0,1.5], [0,2.4], [0,10])
 
-	fig, axs = plt.subplots(2, 2, sharex=True, squeeze=True, num=figname, figsize=(6, 4))
+	fig, axs = plt.subplots(2, 2, sharex=True, num=figname, figsize=(6, 4))
 
-	for ax, n, ylim in zip(axs, ns, ylims):
+	for ax, n, ylim in zip(np.ravel(axs), ns, ylims):
 
 		for case in cases: case.curve(ax, 'statis_plot.dat', n)
 
 		ax.set_xlim(y_plus_lim)
 		ax.set_ylim(ylim)
 
-	axs[1].legend([case.name for case in cases], loc='upper left', fontsize=8, handlelength=5, frameon=False)
-	axs[0].set_xlabel('')
-	axs[1].set_xlabel('')
+	axs[0,1].legend([case.name for case in cases], loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	axs[0,0].set_xlabel('')
+	axs[0,1].set_xlabel('')
 
-	fig.align_labels()
 	fig.tight_layout()
 	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
@@ -56,8 +57,9 @@ def plot_FlucIntens(cases, figname='FlucIntens'):
 
 def plot_TimeSpaceSpectra(cases, figname='TimeSpaceSpectra'):
 	ns = (1, 2, 3, 4)
-	js = (1, 2, 3, 4, 5)
-	yps = (5,15,30,50,100)
+	js = (1, 2, 5)
+	yps = (5,15,100)
+	levels = (-3, -1, 1)
 
 	fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(6, 6))
 	
@@ -65,32 +67,35 @@ def plot_TimeSpaceSpectra(cases, figname='TimeSpaceSpectra'):
 		for ax, yp, j in zip(axr, yps, js):	# col
 
 			if isinstance(cases, Iterable):
-				for case in cases: case.contour(ax, 'ESTS_xt_jprb%i.dat'%j, n, levels=(-3, -1, 1))
+				for case in cases: case.contour(ax, 'ESTS_xt_jprb%i.dat'%j, n, levels=levels)
 			else:
 				case = cases
-				case.contour(ax, 'ESTS_xt_jprb%i.dat'%j, n, levels=(-3, -1, 1), colors="black", linestyles="--")
-				case.contour(ax, 'ESTS_LAMW_xt_jprb%i.dat'%j, n, levels=(-3, -1, 1), colors="red", linestyles='-')
+				case.contour(ax, 'ESTS_xt_jprb%i.dat'%j, n, levels=levels, colors="black", linestyles="--")
+				case.contour(ax, 'ESTS_LAMW_xt_jprb%i.dat'%j, n, levels=levels, colors="red", linestyles='-')
 
 			ax.set_xlim(k_x_plus_lim)
 			ax.set_ylim(k_t_plus_lim)
 
 			if ax in axs[:,-1]:
-				secax = ax.secondary_yaxis('right')
-				secax.set_yticks([])
-				secax.set_ylabel(ax.get_title())
+				ax2 = ax.twinx()
+				ax2.set_yticks([])
+				ax2.set_ylabel(ax.get_title(),
+					horizontalalignment='left',
+					verticalalignment='center',
+					rotation="horizontal")
 			if ax not in axs[-1] : ax.set_xlabel('')
 			if ax not in axs[:,0]: ax.set_ylabel('')
 			ax.set_title( r"$y^+$ = %.0f"%yp if (ax in axs[0]) else '')
 
-	fig.align_labels()
 	fig.tight_layout()
 	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
 
 def plot_TimeSpaceCorrelation(cases, figname='TimeSpaceCorrelation'):
 	ns = (1, 2, 3, 4)
-	js = (1, 2, 3, 4, 5)
-	yps = (5,15,30,50,100)
+	js = (1, 2, 5)
+	yps = (5,15,100)
+	levels = (0.2, 0.4, 0.8)
 
 	fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(6, 6))
 	
@@ -98,24 +103,26 @@ def plot_TimeSpaceCorrelation(cases, figname='TimeSpaceCorrelation'):
 		for ax, yp, j in zip(axr, yps, js):
 
 			if isinstance(cases, Iterable):
-				for case in cases: case.contour(ax, 'CORTS_xt_jprb%i.dat'%j, n, levels=(0.1, 0.2, 0.4, 0.8))
+				for case in cases: case.contour(ax, 'CORTS_xt_jprb%i.dat'%j, n, levels=levels)
 			else:
 				case = cases
-				case.contour(ax, 'CORTS_xt_jprb%i.dat'%j, n, levels=(0.15, 0.2, 0.4, 0.8), colors="black", linestyles="--")
-				case.contour(ax, 'CORTS_ELIP_xt_jprb%i.dat'%j, n, levels=(0.15, 0.2, 0.4, 0.8), colors="red", linestyles='-')
+				case.contour(ax, 'CORTS_xt_jprb%i.dat'%j, n, levels=levels, colors="black", linestyles="--")
+				case.contour(ax, 'CORTS_ELIP_xt_jprb%i.dat'%j, n, levels=levels, colors="red", linestyles='-')
 
 			ax.set_xlim([-800, 800])
 			ax.set_ylim([-60, 60])
 
 			if ax in axs[:,-1]:
-				secax = ax.secondary_yaxis('right')
-				secax.set_yticks([])
-				secax.set_ylabel(ax.get_title())
+				ax2 = ax.twinx()
+				ax2.set_yticks([])
+				ax2.set_ylabel(ax.get_title(),
+					horizontalalignment='left',
+					verticalalignment='center',
+					rotation="horizontal")
 			if ax not in axs[-1] : ax.set_xlabel('')
 			if ax not in axs[:,0]: ax.set_ylabel('')
 			ax.set_title( r"$y^+$ = %.0f"%yp if (ax in axs[0]) else '')
 
-	fig.align_labels()
 	fig.tight_layout()
 	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
@@ -125,9 +132,9 @@ def plot_EllipticPara(cases, figname='EllipticPara'):
 	ns1 = (1,2,3,4)
 	ns2 = (5,6,7,8)
 
-	fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=True, num=figname, figsize=(6, 4))
+	fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, num=figname, figsize=(6, 4))
 
-	for ax, n1, n2 in zip(axs, ns1, ns2):
+	for ax, n1, n2 in zip(np.ravel(axs), ns1, ns2):
 
 		if isinstance(cases, Iterable):
 			for case in cases: case.curve(ax, "elip_plot.dat", n1)
@@ -148,79 +155,88 @@ def plot_EllipticPara(cases, figname='EllipticPara'):
 			ylabel2 = ax.get_ylabel()
 
 		ax.set_xlim(y_plus_lim)
-		ax.set_ylim([0, 25])
+		ax.set_ylim([0, 20])
 
-		ax.set_ylabel(ylabel1+", "+ylabel2)
+		ax.set_ylabel(ylabel1+'\n\n'+ylabel2,
+			horizontalalignment='right',
+			verticalalignment='center',
+			rotation="horizontal")
 
-	axs[0].legend(legends, loc='upper left', fontsize=8, handlelength=5, frameon=False)
-	axs[0].set_xlabel('')
-	axs[1].set_xlabel('')
+	axs[0,0].legend(legends, loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	axs[0,0].set_xlabel('')
+	axs[0,1].set_xlabel('')
 
-	fig.align_labels()
 	fig.tight_layout()
 	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
 
 
-def plot_LAMWPara(case, figname='LAMWPara'):
+def plot_LAMWPara(cases, figname='LAMWPara'):
 	ns1 = (1,2,3,4)
 	ns2 = (5,6,7,8)
 	js = (1,3,5)
 
-	fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=True, num=figname, figsize=(6, 4))
+	fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, num=figname, figsize=(6, 4))
 
-	for ax, n1, n2 in zip(axs, ns1, ns2):
+	for ax, n1, n2 in zip(np.ravel(axs), ns1, ns2):
 		for j in js:
 
 			if isinstance(cases, Iterable):
-				for case in cases: case.curve(ax, "lamw_plot_jprb%i.dat"%j, n1)
+				for case in cases: case.curve(ax, "lamw_plot_jprb%i.dat"%j, n1, lw=1)
 				ylabel1, legends = ax.get_ylabel(), [case.name for case in cases]
 
-				for case in cases: case.curve(ax, "lamw_plot_jprb%i.dat"%j, n2)
+				for case in cases: case.curve(ax, "lamw_plot_jprb%i.dat"%j, n2, lw=1)
 				ylabel2 = ax.get_ylabel()
 
 			else:
 				case = cases
 
-				case.curve(ax, "ESTS_moments_jprb%i.dat"%j, n1, color="black", ls="--")
-				case.curve(ax, "lamw_plot_jprb%i.dat"%j, n1, color="red", ls='-')
+				case.curve(ax, "ESTS_moments_jprb%i.dat"%j, n1, color="black", ls="--", lw=1)
+				case.curve(ax, "lamw_plot_jprb%i.dat"%j, n1, color="red", ls='-', lw=1)
 				ylabel1, legends = ax.get_ylabel(), ["space-time data", "space data"]
 
-				case.curve(ax, "ESTS_moments_jprb%i.dat"%j, n2, color="black", ls="--")
-				case.curve(ax, "lamw_plot_jprb%i.dat"%j, n2, color="red", ls='-')
+				case.curve(ax, "ESTS_moments_jprb%i.dat"%j, n2, color="black", ls="--", lw=1)
+				case.curve(ax, "lamw_plot_jprb%i.dat"%j, n2, color="red", ls='-', lw=1)
 				ylabel2 = ax.get_ylabel()
 
-		ax.set_xlim(y_plus_lim)
+		ax.set_xlim(k_x_plus_lim)
 		ax.set_ylim([0, 25])
 
-		ax.set_ylabel(ylabel1+", "+ylabel2)
+		ax.set_ylabel(ylabel1+'\n\n'+ylabel2,
+			horizontalalignment='right',
+			verticalalignment='center',
+			rotation="horizontal")
 
-	axs[0].legend(legends, loc='upper left', fontsize=8, handlelength=5, frameon=False)
-	axs[0].set_xlabel('')
-	axs[1].set_xlabel('')
+	axs[0,0].legend(legends, loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	axs[0,0].set_xlabel('')
+	axs[0,1].set_xlabel('')
+	axs[0,1].annotate(r"$y^+$ increasing", xy=(0.1, 20), xytext=(0.05, 5), fontsize=7, arrowprops=dict(arrowstyle="->"))
+	axs[0,1].annotate(r"$y^+$ increasing", xy=(0.1, 0 ), xytext=(0.05, 5), fontsize=7, arrowprops=dict(arrowstyle="->"))
 
-	fig.align_labels()
 	fig.tight_layout()
 	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
 
 
-
-plot_MeanU([M1000, M2000, M4000, F1000])
-plot_FlucIntens([M1000, M2000, M4000, F1000])
-plot_TimeSpaceSpectra([M1000, F1000])
-plot_TimeSpaceCorrelation([M1000, F1000])
-
-plot_EllipticPara(M1000, figname="EllipticPara_M1000")
-plot_LAMWPara(M1000, figname="LAMWPara_M1000")
-plot_TimeSpaceSpectra(M1000, figname="TimeSpaceSpectra_M1000")
-plot_TimeSpaceCorrelation(M1000, figname="TimeSpaceCorrelation_M1000")
+## TODO
+画同一个case不同分量参数比较，还有不同高度参数比较的图
 
 
-plot_TimeSpaceSpectra([M1000, M2000, M4000], figname="TimeSpaceSpectra_Re")
-plot_TimeSpaceCorrelation([M1000, M2000, M4000], figname="TimeSpaceCorrelation_Re")
-plot_EllipticPara([M1000, M2000, M4000], figname="EllipticPara_Re")
+# plot_MeanU([M1000, M2000, M4000, F1000])
+# plot_FlucIntens([M1000, M2000, M4000, F1000])
+# plot_TimeSpaceSpectra([M1000, F1000], figname="TimeSpaceSpectra_MvsF")
+# plot_TimeSpaceCorrelation([M1000, F1000], figname="TimeSpaceCorrelation_MvsF")
 
+# plot_EllipticPara(M1000, figname="EllipticPara_M1000")
+# plot_LAMWPara(M1000, figname="LAMWPara_M1000")
+# plot_TimeSpaceSpectra(M1000, figname="TimeSpaceSpectra_M1000")
+# plot_TimeSpaceCorrelation(M1000, figname="TimeSpaceCorrelation_M1000")
+
+
+# plot_TimeSpaceSpectra([M1000, M2000, M4000], figname="TimeSpaceSpectra_Re")
+# plot_TimeSpaceCorrelation([M1000, M2000, M4000], figname="TimeSpaceCorrelation_Re")
+# plot_EllipticPara([M1000, M2000, M4000], figname="EllipticPara_Re")
+plot_LAMWPara([M1000, M2000, M4000], figname="LAMWPara_Re")
 
 
 
@@ -925,7 +941,7 @@ for n in range(4):
 	if n in [2, 3]:
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(labels[1])
-# fig.align_labels()
+# # fig.align_labels()
 fig.tight_layout()
 fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()

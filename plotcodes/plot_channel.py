@@ -1,5 +1,232 @@
 #!/work1/cuigx2_work/whn/anaconda_install/anaconda3/bin/python
-from plot_lib import *
+from collections import Iterable
+from plot_lib import Case
+
+M1000 = Case("/back1/cuigx2_back1/whn/data/DNS1000M/postdata/figures/", name="M1000", color="red", style="-")
+M2000 = Case("/back1/cuigx2_back1/whn/data/DNS2000M/postdata/figures/", name="M2000", color="blue", style="--")
+M4000 = Case("/back1/cuigx2_back1/whn/data/DNS4000M/postdata/figures/", name="M4000", color="green", style="-.")
+F1000 = Case("/back1/cuigx2_back1/whn/data/DNS1000F/postdata/figures/", name="F1000", color="black", style=":")
+
+# figure parameters
+lambda_x_plus_lim = np.array([16, 3500])
+lambda_z_plus_lim = np.array([8, 350])
+k_x_plus_lim = np.array([-1, 1]) * max(2*np.pi / lambda_x_plus_lim)
+k_t_plus_lim = np.array([-1, 1]) * max(15 * k_x_plus_lim)
+y_plus_lim = [1, 150]
+
+
+
+# plot
+def plot_MeanU(cases, figname='MeanU'):
+	fig, ax = plt.figure(num=figname, figsize=(4, 4)), plt.gca()
+
+	for case in cases: case.curve(ax, 'means_plot.dat', 1)
+
+	ax.legend([case.name for case in cases], loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	ax.set_xlim(y_plus_lim)
+	ax.set_ylim([0,25])
+
+	fig.align_labels()
+	fig.tight_layout()
+	fig.savefig(figure_path+figname+'.png', dpi=200)
+	plt.close()
+
+def plot_FlucIntens(cases, figname='FlucIntens'):
+	ns = (1,2,3,5)
+	ylims = ([0,10], [0,1.5], [0,2.4], [0,10])
+
+	fig, axs = plt.subplots(2, 2, sharex=True, squeeze=True, num=figname, figsize=(6, 4))
+
+	for ax, n, ylim in zip(axs, ns, ylims):
+
+		for case in cases: case.curve(ax, 'statis_plot.dat', n)
+
+		ax.set_xlim(y_plus_lim)
+		ax.set_ylim(ylim)
+
+	axs[1].legend([case.name for case in cases], loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	axs[0].set_xlabel('')
+	axs[1].set_xlabel('')
+
+	fig.align_labels()
+	fig.tight_layout()
+	fig.savefig(figure_path+figname+'.png', dpi=200)
+	plt.close()
+
+
+def plot_TimeSpaceSpectra(cases, figname='TimeSpaceSpectra'):
+	ns = (1, 2, 3, 4)
+	js = (1, 2, 3, 4, 5)
+	yps = (5,15,30,50,100)
+
+	fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(6, 6))
+	
+	for axr, n in zip(axs, ns):	# row
+		for ax, yp, j in zip(axr, yps, js):	# col
+
+			if isinstance(cases, Iterable):
+				for case in cases: case.contour(ax, 'ESTS_xt_jprb%i.dat'%j, n, levels=(-3, -1, 1))
+			else:
+				case = cases
+				case.contour(ax, 'ESTS_xt_jprb%i.dat'%j, n, levels=(-3, -1, 1), colors="black", linestyles="--")
+				case.contour(ax, 'ESTS_LAMW_xt_jprb%i.dat'%j, n, levels=(-3, -1, 1), colors="red", linestyles='-')
+
+			ax.set_xlim(k_x_plus_lim)
+			ax.set_ylim(k_t_plus_lim)
+
+			if ax in axs[:,-1]:
+				secax = ax.secondary_yaxis('right')
+				secax.set_yticks([])
+				secax.set_ylabel(ax.get_title())
+			if ax not in axs[-1] : ax.set_xlabel('')
+			if ax not in axs[:,0]: ax.set_ylabel('')
+			ax.set_title( r"$y^+$ = %.0f"%yp if (ax in axs[0]) else '')
+
+	fig.align_labels()
+	fig.tight_layout()
+	fig.savefig(figure_path+figname+'.png', dpi=200)
+	plt.close()
+
+def plot_TimeSpaceCorrelation(cases, figname='TimeSpaceCorrelation'):
+	ns = (1, 2, 3, 4)
+	js = (1, 2, 3, 4, 5)
+	yps = (5,15,30,50,100)
+
+	fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(6, 6))
+	
+	for axr, n in zip(axs, ns):
+		for ax, yp, j in zip(axr, yps, js):
+
+			if isinstance(cases, Iterable):
+				for case in cases: case.contour(ax, 'CORTS_xt_jprb%i.dat'%j, n, levels=(0.1, 0.2, 0.4, 0.8))
+			else:
+				case = cases
+				case.contour(ax, 'CORTS_xt_jprb%i.dat'%j, n, levels=(0.15, 0.2, 0.4, 0.8), colors="black", linestyles="--")
+				case.contour(ax, 'CORTS_ELIP_xt_jprb%i.dat'%j, n, levels=(0.15, 0.2, 0.4, 0.8), colors="red", linestyles='-')
+
+			ax.set_xlim([-800, 800])
+			ax.set_ylim([-60, 60])
+
+			if ax in axs[:,-1]:
+				secax = ax.secondary_yaxis('right')
+				secax.set_yticks([])
+				secax.set_ylabel(ax.get_title())
+			if ax not in axs[-1] : ax.set_xlabel('')
+			if ax not in axs[:,0]: ax.set_ylabel('')
+			ax.set_title( r"$y^+$ = %.0f"%yp if (ax in axs[0]) else '')
+
+	fig.align_labels()
+	fig.tight_layout()
+	fig.savefig(figure_path+figname+'.png', dpi=200)
+	plt.close()
+
+
+def plot_EllipticPara(cases, figname='EllipticPara'):
+	ns1 = (1,2,3,4)
+	ns2 = (5,6,7,8)
+
+	fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=True, num=figname, figsize=(6, 4))
+
+	for ax, n1, n2 in zip(axs, ns1, ns2):
+
+		if isinstance(cases, Iterable):
+			for case in cases: case.curve(ax, "elip_plot.dat", n1)
+			ylabel1, legends = ax.get_ylabel(), [case.name for case in cases]
+
+			for case in cases: case.curve(ax, "elip_plot.dat", n2)
+			ylabel2 = ax.get_ylabel()
+
+		else:
+			case = cases
+
+			case.curve(ax, "ESTS_convswep.dat", n1, color="black", ls='', marker='d')
+			case.curve(ax, "elip_plot.dat", n1, color="red", ls='-')
+			ylabel1, legends = ax.get_ylabel(), ["space-time data", "space data"]
+
+			case.curve(ax, "ESTS_convswep.dat", n2, color="black", ls='', marker='d')
+			case.curve(ax, "elip_plot.dat", n2, color="red", ls='-')
+			ylabel2 = ax.get_ylabel()
+
+		ax.set_xlim(y_plus_lim)
+		ax.set_ylim([0, 25])
+
+		ax.set_ylabel(ylabel1+", "+ylabel2)
+
+	axs[0].legend(legends, loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	axs[0].set_xlabel('')
+	axs[1].set_xlabel('')
+
+	fig.align_labels()
+	fig.tight_layout()
+	fig.savefig(figure_path+figname+'.png', dpi=200)
+	plt.close()
+
+
+def plot_LAMWPara(case, figname='LAMWPara'):
+	ns1 = (1,2,3,4)
+	ns2 = (5,6,7,8)
+	js = (1,3,5)
+
+	fig, axs = plt.subplots(2, 2, sharex=True, sharey=True, squeeze=True, num=figname, figsize=(6, 4))
+
+	for ax, n1, n2 in zip(axs, ns1, ns2):
+		for j in js:
+
+			if isinstance(cases, Iterable):
+				for case in cases: case.curve(ax, "lamw_plot_jprb%i.dat"%j, n1)
+				ylabel1, legends = ax.get_ylabel(), [case.name for case in cases]
+
+				for case in cases: case.curve(ax, "lamw_plot_jprb%i.dat"%j, n2)
+				ylabel2 = ax.get_ylabel()
+
+			else:
+				case = cases
+
+				case.curve(ax, "ESTS_moments_jprb%i.dat"%j, n1, color="black", ls="--")
+				case.curve(ax, "lamw_plot_jprb%i.dat"%j, n1, color="red", ls='-')
+				ylabel1, legends = ax.get_ylabel(), ["space-time data", "space data"]
+
+				case.curve(ax, "ESTS_moments_jprb%i.dat"%j, n2, color="black", ls="--")
+				case.curve(ax, "lamw_plot_jprb%i.dat"%j, n2, color="red", ls='-')
+				ylabel2 = ax.get_ylabel()
+
+		ax.set_xlim(y_plus_lim)
+		ax.set_ylim([0, 25])
+
+		ax.set_ylabel(ylabel1+", "+ylabel2)
+
+	axs[0].legend(legends, loc='upper left', fontsize=8, handlelength=5, frameon=False)
+	axs[0].set_xlabel('')
+	axs[1].set_xlabel('')
+
+	fig.align_labels()
+	fig.tight_layout()
+	fig.savefig(figure_path+figname+'.png', dpi=200)
+	plt.close()
+
+
+
+plot_MeanU([M1000, M2000, M4000, F1000])
+plot_FlucIntens([M1000, M2000, M4000, F1000])
+plot_TimeSpaceSpectra([M1000, F1000])
+plot_TimeSpaceCorrelation([M1000, F1000])
+
+plot_EllipticPara(M1000, figname="EllipticPara_M1000")
+plot_LAMWPara(M1000, figname="LAMWPara_M1000")
+plot_TimeSpaceSpectra(M1000, figname="TimeSpaceSpectra_M1000")
+plot_TimeSpaceCorrelation(M1000, figname="TimeSpaceCorrelation_M1000")
+
+
+plot_TimeSpaceSpectra([M1000, M2000, M4000], figname="TimeSpaceSpectra_Re")
+plot_TimeSpaceCorrelation([M1000, M2000, M4000], figname="TimeSpaceCorrelation_Re")
+plot_EllipticPara([M1000, M2000, M4000], figname="EllipticPara_Re")
+
+
+
+
+exit()
+
+
 
 
 case_names = ['M1000', 'M2000', 'M4000', 'F1000']
@@ -44,8 +271,8 @@ def set_path(case_name):
 
 ### basic statistics
 
-fig_name = 'Mean_U'
-fig, ax = plt.figure(num=fig_name, figsize=(3, 3)), plt.gca()
+figname = 'Mean_U'
+fig, ax = plt.figure(num=figname, figsize=(3, 3)), plt.gca()
 for case_name in case_names:
 	path = set_path(case_name)
 	labels = plot_line(ax, path+'means_plot.dat', 1, color=plot_colors[case_name], linestyle=plot_styles[case_name])
@@ -55,11 +282,11 @@ ax.set_ylim([0,25])
 ax.set_xlabel(labels[0])
 ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
-fig_name = 'FlucIntens'
-fig, axs = plt.subplots(2, 2, sharex=True, num=fig_name, figsize=(6, 4))
+figname = 'FlucIntens'
+fig, axs = plt.subplots(2, 2, sharex=True, num=figname, figsize=(6, 4))
 ylims = ([0,10], [0,1.5], [0,2.4], [0,10])
 for n in range(4):
 	ax = axs.ravel()[n]
@@ -74,13 +301,13 @@ for n in range(4):
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
 
-fig_name = 'EnergySpectra1D'
-fig, axs = plt.subplots(len(ns), 2, sharex='col', sharey='row', squeeze=False, num=fig_name, figsize=(6, 3*len(ns)))
+figname = 'EnergySpectra1D'
+fig, axs = plt.subplots(len(ns), 2, sharex='col', sharey='row', squeeze=False, num=figname, figsize=(6, 3*len(ns)))
 contour_levels = [
 	[(0.125, 0.25, 0.5, 1.0), (0.2, 0.4, 0.8, 1.6)],
 	[(0.025, 0.05, 0.1 ,0.175), (0.035, 0.07, 0.14, 0.28)],
@@ -103,15 +330,15 @@ for col in range(2):
 		if col == 0:
 			ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
 for case_name in case_names:
 	path = set_path(case_name)
 
-	fig_name = 'EnergySpectra2D_%s'%case_name
-	fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+	figname = 'EnergySpectra2D_%s'%case_name
+	fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 	for col in range(len(js)):
 		for row in range(len(ns)):
 			ax = axs[row, col]
@@ -127,7 +354,7 @@ for case_name in case_names:
 			if col == 0:
 				ax.set_ylabel(labels[1])
 	fig.tight_layout()
-	fig.savefig(figure_path+fig_name+'.png', dpi=200)
+	fig.savefig(figure_path+figname+'.png', dpi=200)
 	plt.close()
 
 
@@ -135,8 +362,8 @@ for case_name in case_names:
 
 ### space-time DNS results
 
-fig_name = 'TimeSpaceSpectra'
-fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+figname = 'TimeSpaceSpectra'
+fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 for col in range(len(js)):
 	for row in range(len(ns)):
 		ax = axs[row, col]
@@ -157,11 +384,11 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
-fig_name = 'TimeSpaceCorrelation'
-fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+figname = 'TimeSpaceCorrelation'
+fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 for col in range(len(js)):
 	for row in range(len(ns)):
 		ax = axs[row, col]
@@ -182,12 +409,12 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
-fig_name = 'EllipticPara_TS'
-fig, axs = plt.subplots(len(ns), 1, sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4, 3*len(ns)))
+figname = 'EllipticPara_TS'
+fig, axs = plt.subplots(len(ns), 1, sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4, 3*len(ns)))
 for row in range(len(ns)):
 	ax = axs[row,0]
 	legends = []
@@ -212,12 +439,12 @@ for row in range(len(ns)):
 		ax.set_xlabel(labels1[0])
 	ax.set_ylabel(labels1[1]+', '+labels2[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
-fig_name = 'EllipticPara_components_cmp_TS'
-fig, axs = plt.subplots(len(case_names), 1, sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4, 4*len(case_names)))
+figname = 'EllipticPara_components_cmp_TS'
+fig, axs = plt.subplots(len(case_names), 1, sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4, 4*len(case_names)))
 for row in range(len(case_names)):
 	ax = axs[row,0]
 	case_name = case_names[row]
@@ -238,13 +465,13 @@ for row in range(len(case_names)):
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(r"$U^+, V^+$")
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
 
-fig_name = 'LAMWPara_TS'
-fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+figname = 'LAMWPara_TS'
+fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 for col in range(len(js)):
 	for row in range(len(ns)):
 		ax = axs[row, col]
@@ -276,12 +503,12 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(labels1[1]+', '+labels2[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
-fig_name = 'LAMWPara_components_cmp_TS'
-fig, axs = plt.subplots(len(case_names), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4*len(js), 4*len(case_names)))
+figname = 'LAMWPara_components_cmp_TS'
+fig, axs = plt.subplots(len(case_names), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4*len(js), 4*len(case_names)))
 for col in range(len(js)):
 	for row in range(len(case_names)):
 		ax = axs[row, col]
@@ -308,7 +535,7 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(r"$-\omega_c^+, \sqrt{B^+}$")
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
@@ -319,8 +546,8 @@ plt.close()
 
 ## time derivative result
 
-fig_name = 'ConvecVelo1D_x'
-fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+figname = 'ConvecVelo1D_x'
+fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 for col in range(len(js)):
 	for row in range(len(ns)):
 		ax = axs[row, col]
@@ -344,12 +571,12 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
-fig_name = 'ConvecVelo1D_z'
-fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+figname = 'ConvecVelo1D_z'
+fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 for col in range(len(js)):
 	for row in range(len(ns)):
 		ax = axs[row, col]
@@ -373,7 +600,7 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
@@ -381,8 +608,8 @@ for case_name in case_names:
 	try:
 		path = set_path(case_name)
 
-		fig_name = 'ConvecVelo2D_%s'%case_name
-		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+		figname = 'ConvecVelo2D_%s'%case_name
+		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 		for col in range(len(js)):
 			for row in range(len(ns)):
 				ax = axs[row, col]
@@ -403,7 +630,7 @@ for case_name in case_names:
 		fig.tight_layout()
 		fig.subplots_adjust(right=0.95)
 		fig.colorbar(cs, cax=plt.axes([0.96,0.06,0.01,0.9]), format='%i', ticks=cs.levels, extendrect=True)
-		fig.savefig(figure_path+fig_name+'.png', dpi=200)
+		fig.savefig(figure_path+figname+'.png', dpi=200)
 	
 		plt.close()
 	except IOError:
@@ -416,8 +643,8 @@ for case_name in case_names:
 
 
 
-fig_name = 'EllipticPara_S'
-fig, axs = plt.subplots(len(ns), 1, sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4, 3*len(ns)))
+figname = 'EllipticPara_S'
+fig, axs = plt.subplots(len(ns), 1, sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4, 3*len(ns)))
 for row in range(len(ns)):
 	ax = axs[row,0]
 	legends = []
@@ -442,11 +669,11 @@ for row in range(len(ns)):
 		ax.set_xlabel(labels1[0])
 	ax.set_ylabel(labels1[1]+', '+labels2[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
-fig_name = 'EllipticPara_components_cmp_S'
-fig, axs = plt.subplots(len(case_names), 1, sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4, 4*len(case_names)))
+figname = 'EllipticPara_components_cmp_S'
+fig, axs = plt.subplots(len(case_names), 1, sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4, 4*len(case_names)))
 for row in range(len(case_names)):
 	ax = axs[row,0]
 	case_name = case_names[row]
@@ -467,7 +694,7 @@ for row in range(len(case_names)):
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(r"$U^+, V^+$")
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 for case_name in case_names:
@@ -475,8 +702,8 @@ for case_name in case_names:
 		path = set_path(case_name)
 
 
-		fig_name = 'EllipticPara_cmp_%s'%case_name
-		fig, axs = plt.subplots(len(ns), 1, sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4, 3*len(ns)))
+		figname = 'EllipticPara_cmp_%s'%case_name
+		fig, axs = plt.subplots(len(ns), 1, sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4, 3*len(ns)))
 
 		for row in range(len(ns)):
 			ax = axs[row,0]
@@ -497,13 +724,13 @@ for case_name in case_names:
 				ax.set_xlabel(labels1[0])
 			ax.set_ylabel(labels1[1]+', '+labels2[1])
 		fig.tight_layout()
-		fig.savefig(figure_path+fig_name+'.png', dpi=200)
+		fig.savefig(figure_path+figname+'.png', dpi=200)
 	
 		plt.close()
 
 
-		fig_name = 'TimeSpaceCorrelation_elip_cmp_%s'%case_name
-		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+		figname = 'TimeSpaceCorrelation_elip_cmp_%s'%case_name
+		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 		for col in range(len(js)):
 			for row in range(len(ns)):
 				ax = axs[row,col]
@@ -523,7 +750,7 @@ for case_name in case_names:
 				if col == 0:
 					ax.set_ylabel(labels[1])
 		fig.tight_layout()
-		fig.savefig(figure_path+fig_name+'.png', dpi=200)
+		fig.savefig(figure_path+figname+'.png', dpi=200)
 	
 		plt.close()
 
@@ -537,8 +764,8 @@ for case_name in case_names:
 
 
 
-fig_name = 'LAMWPara_S'
-fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+figname = 'LAMWPara_S'
+fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 for col in range(len(js)):
 	for row in range(len(ns)):
 		ax = axs[row, col]
@@ -570,12 +797,12 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(labels1[1]+', '+labels2[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
-fig_name = 'LAMWPara_components_cmp_S'
-fig, axs = plt.subplots(len(case_names), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(4*len(js), 4*len(case_names)))
+figname = 'LAMWPara_components_cmp_S'
+fig, axs = plt.subplots(len(case_names), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(4*len(js), 4*len(case_names)))
 for col in range(len(js)):
 	for row in range(len(case_names)):
 		ax = axs[row, col]
@@ -602,7 +829,7 @@ for col in range(len(js)):
 		if col == 0:
 			ax.set_ylabel(r"$-\omega_c^+, \sqrt{B^+}$")
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 
@@ -611,8 +838,8 @@ for case_name in case_names:
 		path = set_path(case_name)
 
 
-		fig_name = 'LAMWPara_cmp_%s'%case_name
-		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+		figname = 'LAMWPara_cmp_%s'%case_name
+		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 		for col in range(len(js)):
 			for row in range(len(ns)):
 				ax = axs[row, col]
@@ -644,13 +871,13 @@ for case_name in case_names:
 				if col == 0:
 					ax.set_ylabel(labels1[1]+', '+labels2[1])
 		fig.tight_layout()
-		fig.savefig(figure_path+fig_name+'.png', dpi=200)
+		fig.savefig(figure_path+figname+'.png', dpi=200)
 	
 		plt.close()
 
 
-		fig_name = 'TimeSpaceSpectra_lamw_cmp_%s'%case_name
-		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=fig_name, figsize=(3*len(js), 3*len(ns)))
+		figname = 'TimeSpaceSpectra_lamw_cmp_%s'%case_name
+		fig, axs = plt.subplots(len(ns), len(js), sharex=True, sharey=True, squeeze=False, num=figname, figsize=(3*len(js), 3*len(ns)))
 		for col in range(len(js)):
 			for row in range(len(ns)):
 				ax = axs[row, col]
@@ -670,7 +897,7 @@ for case_name in case_names:
 				if col == 0:
 					ax.set_ylabel(labels[1])
 		fig.tight_layout()
-		fig.savefig(figure_path+fig_name+'.png', dpi=200)
+		fig.savefig(figure_path+figname+'.png', dpi=200)
 	
 		plt.close()
 
@@ -683,8 +910,8 @@ for case_name in case_names:
 
 
 
-fig_name = 'MeanProfile'
-fig, axs = plt.subplots(2, 2, sharex=True, num=fig_name, figsize=(6, 4))
+figname = 'MeanProfile'
+fig, axs = plt.subplots(2, 2, sharex=True, num=figname, figsize=(6, 4))
 ylims = ([0,25], [-1,1], [-1,1], [-1.5,0])
 for n in range(4):
 	ax = axs.ravel()[n]
@@ -700,11 +927,11 @@ for n in range(4):
 	ax.set_ylabel(labels[1])
 # fig.align_labels()
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
-fig_name = 'ReynoldsStress'
-fig, axs = plt.subplots(2, 2, sharex=True, num=fig_name, figsize=(6, 4))
+figname = 'ReynoldsStress'
+fig, axs = plt.subplots(2, 2, sharex=True, num=figname, figsize=(6, 4))
 ylims = ([0,10], [0,1.5], [0,2.4], [-1,0])
 for n in range(4):
 	ax = axs.ravel()[n]
@@ -719,11 +946,11 @@ for n in range(4):
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
-fig_name = 'PressureCovariance'
-fig, axs = plt.subplots(2, 2, sharex=True, num=fig_name, figsize=(6, 4))
+figname = 'PressureCovariance'
+fig, axs = plt.subplots(2, 2, sharex=True, num=figname, figsize=(6, 4))
 ylims = ([0,10], [-0.2,1], [-0.2,0.05], [-0.5,0.5])
 for n in range(4):
 	ax = axs.ravel()[n]
@@ -738,11 +965,11 @@ for n in range(4):
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
-fig_name = 'VorticityCovariance'
-fig, axs = plt.subplots(2, 2, sharex=True, num=fig_name, figsize=(6, 4))
+figname = 'VorticityCovariance'
+fig, axs = plt.subplots(2, 2, sharex=True, num=figname, figsize=(6, 4))
 ylims = ([0,0.06], [0,0.05], [0,0.2], [-0.01,0.02])
 for n in range(4):
 	ax = axs.ravel()[n]
@@ -757,7 +984,7 @@ for n in range(4):
 		ax.set_xlabel(labels[0])
 	ax.set_ylabel(labels[1])
 fig.tight_layout()
-fig.savefig(figure_path+fig_name+'.png', dpi=200)
+fig.savefig(figure_path+figname+'.png', dpi=200)
 plt.close()
 
 

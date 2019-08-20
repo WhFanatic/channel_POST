@@ -41,10 +41,15 @@ class Tecplot:
 		return labels, coords
 
 
+	def coord(self, fpn, n):
+		return self.__parse_head(fpn)[1][n]
+
+	def dim(self, fpn):
+		return len(self.__parse_head(fpn)[1])
 
 	def label(self, fpn, n):
 		labels, coords = self.__parse_head(fpn)
-		return labels[n-1+len(coords)]
+		return labels[n-1+self.dim(fpn)]
 
 	def xlabel(self, fpn):
 		return self.__parse_head(fpn)[0][0]
@@ -52,18 +57,15 @@ class Tecplot:
 	def ylabel(self, fpn):
 		return self.__parse_head(fpn)[0][1]
 
-	def coord(self, fpn, n):
-		return self.__parse_head(fpn)[1][n]
 
-	def getData(fpn, n, rows=[]):
+	def getData(self, fpn, n, rows=[]):
 		labels, coords = self.__parse_head(fpn)
 		ncol = len(labels)
 		nrow = np.prod(coords)
-		rowrange = range(nrow) if rows == [] else rows
+		rowrange = range(nrow) if rows==[] else rows
 
-		with open(fpn) as fp:
-			lines = fp.readlines()
-		data = np.array([ [ float(a) for a in lines[row+3].strip().split() ] for row in rowrange ])
+		with open(fpn) as fp:	lines = fp.readlines()
+		data = np.array([ [float(a) for a in lines[row+3].strip().split()] for row in rowrange ])
 		
 		return data[:, list(range(len(coords)))+[n-1+len(coords)]]
 
@@ -78,7 +80,7 @@ class Tecplot:
 				line = fp.readline().strip().split()
 				x[j] = float( line[0] )
 				y[j] = float( line[n] )
-		c = ax.semilogx(x, y, label=self.label(fpn, n), lw=2, **kwarg)
+		c = ax.semilogx(x, y, label=self.label(fpn, n), **kwarg)
 		ax.set_xlabel(self.xlabel(fpn))
 		ax.set_ylabel(self.label(fpn, n))
 		return c
@@ -95,11 +97,11 @@ class Tecplot:
 					y[j,i] = float( line[1] )
 					z[j,i] = float( line[n+1] )
 
-		if filled == 0: c = ax.contour(x, y, z, linewidths=2, **kwarg)
+		if filled == 0: c = ax.contour(x, y, z, **kwarg)
 		elif filled == 1: c = ax.contourf(x, y, z, cmap=plt.cm.rainbow, extend='both', **kwarg)
 		elif filled == 2:
 			ax.contourf(x, y, z, cmap=plt.cm.rainbow, extend='both', **kwarg)
-			c = ax.contour(x, y, z, linewidths=1, **kwarg)
+			c = ax.contour(x, y, z, **kwarg)
 
 		ax.set_xlabel(self.xlabel(fpn))
 		ax.set_ylabel(self.ylabel(fpn))
@@ -122,16 +124,15 @@ class Tecplot:
 
 
 
-
 class Case:
-	def __init__(self, path, name="case0", color=None, style=None, marker=None, markevery=None):
+	def __init__(self, path, name="case0", color=None, style=None):
 
 		self.path = path
 		self.name = name
+
 		self.color = color
 		self.style = style
-		self.marker = marker
-		self.markevery = markevery
+		self.width = 2
 
 		self.plot = Tecplot()
 
@@ -143,19 +144,47 @@ class Case:
 		self.t_nu = self.delta_nu / self.u_tau
 		self.tau_w = self.u_tau**2
 
-	def copy(self, path=None, name=None, color=None, style=None, marker=None, markevery=None):
+	def copy(self, path=-1, name=-1, color=-1, style=-1):
 		return Case(
-			path = path if path else self.path,
-			name = name if name else self.name,
-			color = color if color else self.color,
-			style = style if style else self.style,
-			marker = marker if marker else self.marker,
-			markevery = markevery if markevery else self.markevery	)
+			path = self.path if path==-1 else path,
+			name = self.name if name==-1 else name,
+			color = self.color if color==-1 else color,
+			style = self.style if style==-1 else style	)
 
 	def curve(self, ax, filename, n, **kwarg):
-		self.plot.curve(ax, self.path+filename, n, color=self.color, ls=self.style, marker=self.marker, markevery=self.markevery, **kwarg)
+		ka = {key:kwarg[key] for key in kwarg.keys()}
+		if "color" not in ka.keys(): ka["color"] = self.color
+		if "linestyle" not in ka.keys() and "ls" not in ka.keys(): ka["linestyle"] = self.style
+		if "linewidth" not in ka.keys() and "lw" not in ka.keys(): ka["linewidth"] = self.width
+
+		c = self.plot.curve(ax, self.path+filename, n, **ka)
 
 	def contour(self, ax, filename, n, filled=0, **kwarg):
-		self.plot.contour(ax, self.path+filename, n, filled, colors=self.color, linestyles=self.style, **kwarg)
+		ka = {key:kwarg[key] for key in kwarg.keys()}
+		if "colors" not in ka.keys(): ka["colors"] = self.color
+		if "linestyles" not in ka.keys(): ka["linestyles"] = self.style
+		if "linewidths" not in ka.keys(): ka["linewidths"] = self.width
+
+		c = self.plot.contour(ax, self.path+filename, n, filled, **ka)
+
+
+
+# class Cases:
+# 	def __init__(pathfile = "workpath.txt"):
+
+# 		with open(pathfile) as fp:
+# 			for line in fp.readlines():
+# 				line = line.strip().split().strip()
+# 				if line and line[0] != '#':
+
+
+# test
+if __name__ == "__main__":
+	case = Case('')
+	case2 = case.copy()
+	print(case2)
+
+
+
 
 

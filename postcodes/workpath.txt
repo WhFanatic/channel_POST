@@ -1,2 +1,2 @@
-SOURCE_PATH: E:\POST\data\data_F180
-TARGET_PATH: E:\POST\data\data_F180\postdata
+SOURCE_PATH: E:\POST\data\data_F180\
+TARGET_PATH: E:\POST\data\data_F180\postdata\

@@ -1,7 +1,7 @@
 #!/work1/cuigx2_work/whn/anaconda_install/anaconda3/bin/python
 
 from collections import Iterable
-from plot_lib import *
+from MyTecplot import *
 
 
 class Case:

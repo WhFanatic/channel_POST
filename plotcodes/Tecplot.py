@@ -133,47 +133,6 @@ class Tecplot:
 
 
 
-class Case:
-	def __init__(self, path, name="case0", color=None, style=None):
-
-		self.path = path
-		self.name = name
-
-		self.color = color
-		self.style = style
-
-		self.plot = Tecplot()
-
-		self.y_plus = np.loadtxt(open(self.path+'y_plus.dat'))
-		self.j_probes = np.array([ int(n) for n in np.ravel(np.loadtxt(open(self.path+'j_probes.dat'))) ])
-		self.Re_tau = np.loadtxt(open(self.path+'Re_tau.dat'))
-		self.u_tau = np.loadtxt(open(self.path+'u_tau.dat'))
-		self.delta_nu = 1.0 / self.Re_tau
-		self.t_nu = self.delta_nu / self.u_tau
-		self.tau_w = self.u_tau**2
-
-	def copy(self, path=-1, name=-1, color=-1, style=-1):
-		return Case(
-			path = self.path if path==-1 else path,
-			name = self.name if name==-1 else name,
-			color = self.color if color==-1 else color,
-			style = self.style if style==-1 else style	)
-
-	def curve(self, ax, filename, n, **kwarg):
-		ka = {key:kwarg[key] for key in kwarg.keys()}
-		if "color" not in ka.keys(): ka["color"] = self.color
-		if "linestyle" not in ka.keys() and "ls" not in ka.keys(): ka["linestyle"] = self.style
-		if "linewidth" not in ka.keys() and "lw" not in ka.keys(): ka["linewidth"] = 2
-
-		c = self.plot.curve(ax, self.path+filename, n, **ka)
-
-	def contour(self, ax, filename, n, filled=0, **kwarg):
-		ka = {key:kwarg[key] for key in kwarg.keys()}
-		if "colors" not in ka.keys(): ka["colors"] = self.color
-		if "linestyles" not in ka.keys(): ka["linestyles"] = self.style
-		if "linewidths" not in ka.keys(): ka["linewidths"] = 1
-
-		c = self.plot.contour(ax, self.path+filename, n, filled, **ka)
 
 
 

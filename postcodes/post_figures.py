@@ -5,6 +5,7 @@ from post_spacetime import *
 
 
 figure_path = postdata_path + 'figures/'
+zonename = data_path.strip().strip('/').strip('\\').split('/')[-1].split('\\')[-1]
 
 
 # figure parameters
@@ -35,7 +36,7 @@ file_name = 'means_plot.dat'
 with open(figure_path+file_name, 'w') as fp:
 	fp.write( 'Title = "mean values of basic variables"\n' )
 	fp.write( 'variables = "%s", "%s", "%s", "%s", "%s"\n' %(r"$y^+$", r"$U^+$", r"$V^+$", r"$W^+$", r"$P^+$") )
-	fp.write( 'zone i = %i\n' %len(plot_y) )
+	fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_y)) )
 	for j in plot_y:
 		for data in [ y_plus[j], U_mean[j]/u_tau, V_mean[j]/u_tau, W_mean[j]/u_tau, P_mean[j]/tau_w ]:
 			fp.write('%.18e\t'%data)
@@ -66,7 +67,7 @@ with open(figure_path+file_name, 'w') as fp:
 		r"$<u'u'>^+$", r"$<v'v'>^+$", r"$<w'w'>^+$", r"$<u'v'>^+$",
 		r"$<p'p'>^+$", r"$<u'p'>^+$", r"$<v'p'>^+$", r"$<w'p'>^+$",
 		r"$<\omega_x'\omega_x'>^+$", r"$<\omega_y'\omega_y'>^+$", r"$<\omega_z'\omega_z'>^+$", r"$<\omega_x'\omega_y'>^+$" ) )
-	fp.write( 'zone i = %i\n' %len(plot_y) )
+	fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_y)) )
 	for j in plot_y:
 		for data in [ y_plus[j],
 		RS_uu[j], RS_vv[j], RS_ww[j], RS_uv[j],
@@ -89,7 +90,7 @@ with open(figure_path+file_name, 'w') as fp:
 		r"$P_{vv}^+$", r"$T_{vv}^{d+}$", r"$T_{vv}^{s+}$", r"$\Pi_{vv}^{d+}$", r"$\Pi_{vv}^{s+}$", r"$\nu_{vv}^{d+}$", r"$\epsilon_{vv}^+$",
 		r"$P_{ww}^+$", r"$T_{ww}^{d+}$", r"$T_{ww}^{s+}$", r"$\Pi_{ww}^{d+}$", r"$\Pi_{ww}^{s+}$", r"$\nu_{ww}^{d+}$", r"$\epsilon_{ww}^+$",
 		r"$P_{k}^+$" , r"$T_{k}^{d+}$" , r"$T_{k}^{s+}$" , r"$\Pi_{k}^{d+}$" , r"$\Pi_{k}^{s+}$" , r"$\nu_{k}^{d+}$" , r"$\epsilon_{k}^+$" )	)
-	fp.write( 'zone i = %i\n' %len(plot_y) )
+	fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_y)) )
 	for j in plot_y:
 		for data in [ y_plus[j] ] + list(np.ravel( bgts[:,:,j] )):
 			fp.write('%.18e\t'%data)
@@ -105,7 +106,7 @@ for j in range(len(j_probes)):
 	with open(figure_path+file_name, 'w') as fp:
 		fp.write( 'Title = "pre-multiplied 2D energy spectra at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 		fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\lambda_x^+$", r"$\lambda_z^+$", r"$k_xk_zE_{uu}^+$", r"$k_xk_zE_{vv}^+$", r"$k_xk_zE_{ww}^+$", r"$k_xk_zE_{pp}^+$") )
-		fp.write( 'zone i = %i, j = %i\n' %(len(plot_z), len(plot_x)) )
+		fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, len(plot_z), len(plot_x)) )
 		for i in plot_x:
 			for k in plot_z:
 				for data in [ lambda_x_plus[i], lambda_z_plus[k] ] + list( es2Ds[j,:,k,i] ):
@@ -124,7 +125,7 @@ file_name = 'ES1D_xy.dat'
 with open(figure_path+file_name, 'w') as fp:
 	fp.write( 'Title = "pre-multiplied 1D energy spectra of X & Y"\n' )
 	fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\lambda_x^+$", r"$y^+$", r"$k_xE_{uu}^+$", r"$k_xE_{vv}^+$", r"$k_xE_{ww}^+$", r"$k_xE_{pp}^+$") )
-	fp.write( 'zone i = %i, j = %i\n' %(len(plot_y), len(plot_x)) )
+	fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, len(plot_y), len(plot_x)) )
 	for i in plot_x:
 		for j in plot_y:
 			for data in [ lambda_x_plus[i], y_plus[j] ] + list( es1Ds_xy[:,j,i] ):
@@ -135,7 +136,7 @@ file_name = 'ES1D_zy.dat'
 with open(figure_path+file_name, 'w') as fp:
 	fp.write( 'Title = "pre-multiplied 1D energy spectra of Z & Y"\n' )
 	fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\lambda_z^+$", r"$y^+$", r"$k_zE_{uu}^+$", r"$k_zE_{vv}^+$", r"$k_zE_{ww}^+$", r"$k_zE_{pp}^+$") )
-	fp.write( 'zone i = %i, j = %i\n' %(len(plot_y), len(plot_z)) )
+	fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, len(plot_y), len(plot_z)) )
 	for k in plot_z:
 		for j in plot_y:
 			for data in [ lambda_z_plus[k], y_plus[j] ] + list( es1Ds_zy[:,j,k] ):
@@ -168,7 +169,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "time-space energy spectra at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$k_x^+$", r"$\omega^+$", r"$E_{uu}^+$", r"$E_{vv}^+$", r"$E_{ww}^+$", r"$E_{pp}^+$") )
-			fp.write( 'zone i = %i, j = %i\n' %(Nt, Nx) )
+			fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, Nt, Nx) )
 			for i in np.argsort(k_x_plus):
 				for t in np.argsort(k_t_plus):
 					for data in [ k_x_plus[i], k_t_plus[t] ] + list( esTSs[:,t,i] ):
@@ -179,7 +180,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "time-space correlation at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\Delta x^+$", r"$\Delta t^+$", r"$R_{uu}$", r"$R_{vv}$", r"$R_{ww}$", r"$R_{pp}$") )
-			fp.write( 'zone i = %i, j = %i\n' %(Nt, Nx) )
+			fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, Nt, Nx) )
 			for i in range(Nx):
 				for t in range(Nt):
 					for data in [ delta_x_plus[i], delta_t_plus[t] ] + list( corTSs[:,t,i] ):
@@ -200,7 +201,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "time-space energy spectra at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$k_z^+$", r"$\omega^+$", r"$E_{uu}^+$", r"$E_{vv}^+$", r"$E_{ww}^+$", r"$E_{pp}^+$") )
-			fp.write( 'zone i = %i, j = %i\n' %(Nt, Nz) )
+			fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, Nt, Nz) )
 			for k in np.argsort(k_z_plus):
 				for t in np.argsort(k_t_plus):
 					for data in [ k_z_plus[k], k_t_plus[t] ] + list( esTSs[:,t,k] ):
@@ -211,7 +212,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "time-space correlation at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\Delta z^+$", r"$\Delta t^+$", r"$R_{uu}$", r"$R_{vv}$", r"$R_{ww}$", r"$R_{pp}$") )
-			fp.write( 'zone i = %i, j = %i\n' %(Nt, Nz) )
+			fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, Nt, Nz) )
 			for k in range(Nz):
 				for t in range(Nt):
 					for data in [ delta_z_plus[k], delta_t_plus[t] ] + list( corTSs[:,t,k] ):
@@ -235,7 +236,7 @@ try:
 				r"$k_x^+$",
 				r"$\frac{-\omega_{c,uu}^+}{k_x^+}$", r"$\frac{-\omega_{c,vv}^+}{k_x^+}$", r"$\frac{-\omega_{c,ww}^+}{k_x^+}$", r"$\frac{-\omega_{c,pp}^+}{k_x^+}$",
 				r"$\frac{\sqrt{B_{uu}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{vv}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{ww}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{pp}^+}}{k_x^+}$"	) )
-			fp.write( 'zone i = %i\n' %len(plot_x) )
+			fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_x)) )
 			for i in plot_x:
 				for data in [ k_x_plus[i] ] + list( lamw_omega_c[:,i] ) + list( lamw_B_sqrt[:,i] ):
 					fp.write('%.18e\t'%data)
@@ -251,7 +252,7 @@ try:
 			r"$y^+$",
 			r"$U_{uu}^+$", r"$U_{vv}^+$", r"$U_{ww}^+$", r"$U_{pp}^+$",
 			r"$V_{uu}^+$", r"$V_{vv}^+$", r"$V_{ww}^+$", r"$V_{pp}^+$"	)	)
-		fp.write( 'zone i = %i\n' %len(j_probes) )
+		fp.write( 'zone t = %s, i = %i\n' %(zonename, len(j_probes)) )
 		for j in range(len(j_probes)):
 			for data in [ y_plus[j_probes[j]] ] + list(elip_U[:,j]) + list(elip_V[:,j]):
 				fp.write('%.18e\t'%data)
@@ -280,7 +281,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "2D scale dependent convection velocity at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\lambda_x^+$", r"$\lambda_z^+$", r"$c_{u}^+$", r"$c_{v}^+$", r"$c_{w}^+$", r"$c_{p}^+$") )
-			fp.write( 'zone i = %i, j = %i\n' %(len(plot_z), len(plot_x)) )
+			fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, len(plot_z), len(plot_x)) )
 			for i in plot_x:
 				for k in plot_z:
 					for data in [ lambda_x_plus[i], lambda_z_plus[k] ] + list( conv2Ds[:,k,i] ):
@@ -291,7 +292,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "x scale dependent convection velocity at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s"\n' %(r"$\lambda_x^+$", r"$c_{u}^+$", r"$c_{v}^+$", r"$c_{w}^+$", r"$c_{p}^+$") )
-			fp.write( 'zone i = %i\n' %len(plot_x) )
+			fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_x)) )
 			for i in plot_x:
 				for data in [ lambda_x_plus[i] ] + list( conv1Ds_x[:,i] ):
 					fp.write('%.18e\t'%data)
@@ -301,7 +302,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "z scale dependent convection velocity at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s"\n' %(r"$\lambda_z^+$", r"$c_{u}^+$", r"$c_{v}^+$", r"$c_{w}^+$", r"$c_{p}^+$") )
-			fp.write( 'zone i = %i\n' %len(plot_z) )
+			fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_z)) )
 			for k in plot_z:
 				for data in [ lambda_z_plus[k] ] + list( conv1Ds_z[:,k] ):
 					fp.write('%.18e\t'%data)
@@ -320,7 +321,7 @@ try:
 			r"$y^+$",
 			r"$U_{uu}^+$", r"$U_{vv}^+$", r"$U_{ww}^+$", r"$U_{pp}^+$",
 			r"$V_{uu}^+$", r"$V_{vv}^+$", r"$V_{ww}^+$", r"$V_{pp}^+$"	)	)
-		fp.write( 'zone i = %i\n' %len(plot_y) )
+		fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_y)) )
 		for j in plot_y:
 			for data in [ y_plus[j] ] + list(elip_U[:,j]) + list(elip_V[:,j]):
 				fp.write('%.18e\t'%data)
@@ -334,7 +335,7 @@ try:
 		with open(figure_path+file_name, 'w') as fp:
 			fp.write( 'Title = "time-space correlation at y_plus %.2f reconstructed from space data"\n' %y_plus[j_probes[j]] )
 			fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$\Delta x^+$", r"$\Delta t^+$", r"$R_{uu}$", r"$R_{vv}$", r"$R_{ww}$", r"$R_{pp}$") )
-			fp.write( 'zone i = %i, j = %i\n' %(Nt, Nx) )
+			fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, Nt, Nx) )
 			for i in range(Nx):
 				for t in range(Nt):
 					for data in [ delta_x_plus[i], delta_t_plus[t] ] + list( corTSs[j,:,t,i] ):
@@ -355,7 +356,7 @@ try:
 				r"$k_x^+$",
 				r"$\frac{-\omega_{c,uu}^+}{k_x^+}$", r"$\frac{-\omega_{c,vv}^+}{k_x^+}$", r"$\frac{-\omega_{c,ww}^+}{k_x^+}$", r"$\frac{-\omega_{c,pp}^+}{k_x^+}$",
 				r"$\frac{\sqrt{B_{uu}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{vv}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{ww}^+}}{k_x^+}$", r"$\frac{\sqrt{B_{pp}^+}}{k_x^+}$"	) )
-			fp.write( 'zone i = %i\n' %len(plot_x) )
+			fp.write( 'zone t = %s, i = %i\n' %(zonename, len(plot_x)) )
 			for i in plot_x:
 				for data in [ k_x_plus[i] ] + list( lamw_omega_c[:,j_probes[j],i] ) + list( lamw_B_sqrt[:,j_probes[j],i] ):
 					fp.write('%.18e\t'%data)
@@ -371,7 +372,7 @@ try:
 	# 	with open(figure_path+file_name, 'w') as fp:
 	# 		fp.write( 'Title = "time-space energy spectra at y_plus %.2f"\n' %y_plus[j_probes[j]] )
 	# 		fp.write( 'variables = "%s", "%s", "%s", "%s", "%s", "%s"\n' %(r"$k_x^+$", r"$\omega^+$", r"$E_{uu}^+$", r"$E_{vv}^+$", r"$E_{ww}^+$", r"$E_{pp}^+$") )
-	# 		fp.write( 'zone i = %i, j = %i\n' %(Nt, Nx) )
+	# 		fp.write( 'zone t = %s, i = %i, j = %i\n' %(zonename, Nt, Nx) )
 	# 		for i in np.argsort(k_x_plus):
 	# 			for t in np.argsort(k_t_plus):
 	# 				for data in [ k_x_plus[i], k_t_plus[t] ] + list( esTSs[j,:,t,i] ):

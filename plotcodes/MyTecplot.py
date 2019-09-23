@@ -11,32 +11,46 @@ class Tecplot:
 		with open(fpn) as fp:
 			line = fp.readline()
 
-			line = fp.readline().strip()
-			records = []
-			record = False
-			for c in line:
-				if c == '"':
-					if record == False:
-						record = ''
-					else:
-						records.append(record)
-						record = False
-				elif record != False:
-					record += c
-			labels = records
 
 			line = fp.readline().strip()
-			records = []
-			record = False
-			for c in line:
-				if c == '=':
-					record = ''
-				elif c == ',':
-					records.append(int(record))
-					record = False
-				elif record != False:
-					record += c
-			coords = records + [int(record)]
+			records = line.split('=')[-1].strip().split(',')
+			labels = [ record.strip().strip('"') for record in records ]
+
+			line = fp.readline().strip()
+			line = line[line.index("zone")+4:].strip()
+			records = line.split(',')
+			dic = { record.split('=')[0].strip(): record.split('=')[1].strip() for record in records }
+			coords = []
+			if 'i' in dic.keys(): coords.append( int(dic['i']) )
+			if 'j' in dic.keys(): coords.append( int(dic['j']) )
+			if 'k' in dic.keys(): coords.append( int(dic['k']) )
+
+			# line = fp.readline().strip()
+			# records = []
+			# record = False
+			# for c in line:
+			# 	if c == '"':
+			# 		if record == False:
+			# 			record = ''
+			# 		else:
+			# 			records.append(record)
+			# 			record = False
+			# 	elif record != False:
+			# 		record += c
+			# labels = records
+
+			# line = fp.readline().strip()
+			# records = []
+			# record = False
+			# for c in line:
+			# 	if c == '=':
+			# 		record = ''
+			# 	elif c == ',':
+			# 		records.append(int(record))
+			# 		record = False
+			# 	elif record != False:
+			# 		record += c
+			# coords = records + [int(record)]
 
 		return labels, coords
 
@@ -147,10 +161,10 @@ class Tecplot:
 
 # test
 if __name__ == "__main__":
-	case = Case('')
-	case2 = case.copy()
-	print(case2)
-
+	tcplt = Tecplot()
+	labels, coords = tcplt.parse_head("E:\\POST\\data\\post_M1000\\CORTS_xt_jprb2.dat")
+	print(labels)
+	print(coords)
 
 
 

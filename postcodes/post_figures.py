@@ -5,7 +5,7 @@ from post_spacetime import *
 
 
 figure_path = postdata_path + 'figures/'
-zonename = data_path.strip().strip('/').strip('\\').split('/')[-1].split('\\')[-1]
+zonename = '"%s"'%( data_path.strip().strip('/').strip('\\').split('/')[-1].split('\\')[-1] )
 
 
 # figure parameters

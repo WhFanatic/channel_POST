@@ -1,0 +1,39 @@
+mkdir	data_packed
+
+mv	initialfield	data_packed
+mv	fielddata	data_packed
+mv	probedata	data_packed
+mv	runtimedata	data_packed
+mv	postdata	data_packed
+
+cp	XINDAT	data_packed
+
+mkdir	initialfield
+mkdir	fielddata
+mkdir	probedata
+mkdir	runtimedata
+mkdir	postdata
+
+mkdir -p	fielddata/U
+mkdir -p	fielddata/V
+mkdir -p	fielddata/W
+mkdir -p	fielddata/P
+mkdir -p	fielddata/UU
+mkdir -p	fielddata/VV
+mkdir -p	fielddata/WW
+mkdir -p	fielddata/UV
+mkdir -p	fielddata/VW
+mkdir -p	fielddata/WU
+mkdir -p	fielddata/UT
+mkdir -p	fielddata/VT
+mkdir -p	fielddata/WT
+mkdir -p	fielddata/PT
+
+mkdir -p	probedata/U
+mkdir -p	probedata/V
+mkdir -p	probedata/W
+mkdir -p	probedata/P
+
+mkdir -p	postdata/ES2D
+mkdir -p	postdata/ESTS
+mkdir -p	postdata/figures
